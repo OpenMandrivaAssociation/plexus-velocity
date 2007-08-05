@@ -40,18 +40,17 @@
 %define section     free
 
 Name:           plexus-velocity
-Version:        1.1.2
-Release:        %mkrel 2.1.1
+Version:        1.1.6
+Release:        %mkrel 0.0.1
 Epoch:          0
 Summary:        Plexus Velocity Component
 License:        MIT
 Group:          Development/Java
 URL:            http://plexus.codehaus.org/
-Source0:        plexus-velocity-1.1.2-src.tar.gz
-# svn export svn://svn.plexus.codehaus.org/plexus/tags/plexus-velocity-1.1.2/
-# tar czf plexus-velocity-1.1.2-src.tar.gz plexus-velocity-1.1.2/
-Source1:        plexus-velocity-1.1.2-build.xml
-Source2:        plexus-velocity-1.1.2-project.xml
+# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.6/ && tar cvvjf plexus-velocity-1.1.6.tar.bz2 plexus-velocity-1.1.6/
+Source0:        plexus-velocity-%{version}.tar.bz2
+Source1:        plexus-velocity-1.1.6-build.xml
+Source2:        plexus-velocity-1.1.6-project.xml
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -98,9 +97,9 @@ Group:          Development/Java
 Javadoc for %{name}.
 
 %prep
-%setup -q -n plexus-velocity-1.1.2
+%setup -q
 for j in $(find . -name "*.jar"); do
-        mv $j $j.no
+        rm $j
 done
 cp %{SOURCE1} build.xml
 cp %{SOURCE2} project.xml
@@ -177,7 +176,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %{gcj_support}
 %dir %attr(-,root,root) %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/velocity-1.1.2.jar.*
+%attr(-,root,root) %{_libdir}/gcj/%{name}/velocity-%{version}.jar.*
 %endif
 
 %files javadoc
