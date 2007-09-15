@@ -41,7 +41,7 @@
 
 Name:           plexus-velocity
 Version:        1.1.6
-Release:        %mkrel 0.0.1
+Release:        %mkrel 0.0.2
 Epoch:          0
 Summary:        Plexus Velocity Component
 License:        MIT
@@ -77,8 +77,6 @@ Requires:  velocity
 
 %if %{gcj_support}
 BuildRequires:          java-gcj-compat-devel
-Requires(post):         java-gcj-compat
-Requires(postun):       java-gcj-compat
 %endif
 
 %description
