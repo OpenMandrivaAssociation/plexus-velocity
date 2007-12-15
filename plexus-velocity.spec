@@ -70,6 +70,7 @@ BuildRequires:  maven2-plugin-jar
 BuildRequires:  maven2-plugin-javadoc
 BuildRequires:  maven2-plugin-resources
 BuildRequires:  maven2-plugin-surefire
+BuildRequires:  maven2-plugin-release
 %endif
 BuildRequires:  ant-nodeps
 BuildRequires:  classworlds >= 0:1.1
