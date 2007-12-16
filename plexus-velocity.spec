@@ -42,7 +42,7 @@
 
 Name:           plexus-velocity
 Version:        1.1.6
-Release:        %mkrel 0.0.3
+Release:        %mkrel 0.0.4
 Epoch:          0
 Summary:        Plexus Velocity Component
 License:        MIT
@@ -60,7 +60,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 %if ! %{gcj_support}
 BuildArch:      noarch
 %endif
-BuildRequires:  jpackage-utils >= 0:1.7.2
+BuildRequires:  java-rpmbuild >= 0:1.7.2
 BuildRequires:  ant >= 0:1.6
 %if %{with_maven}
 BuildRequires:  maven2 >= 2.0.4-10jpp
