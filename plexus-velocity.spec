@@ -55,7 +55,6 @@ Source2:        plexus-velocity-1.1.6-project.xml
 Source3:        plexus-velocity-settings.xml
 Source4:        plexus-velocity-1.1.6-jpp-depmap.xml
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %if ! %{gcj_support}
 BuildArch:      noarch
