@@ -41,19 +41,19 @@
 %define subname velocity
 
 Name:           plexus-velocity
-Version:        1.1.6
-Release:        %mkrel 0.0.4
+Version:        1.1.7
+Release:        %mkrel 1.0.1
 Epoch:          0
 Summary:        Plexus Velocity Component
-License:        MIT
+License:         Apache Software License
 Group:          Development/Java
 URL:            http://plexus.codehaus.org/
-# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.6/ && tar cvvjf plexus-velocity-1.1.6.tar.bz2 plexus-velocity-1.1.6/
-Source0:        plexus-velocity-%{version}.tar.bz2
-Source1:        plexus-velocity-1.1.6-build.xml
-Source2:        plexus-velocity-1.1.6-project.xml
+# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.6/ && tar cvvzf plexus-velocity-1.1.6.tar.gz plexus-velocity-1.1.7/
+Source0:        plexus-velocity-%{version}.tar.gz
+Source1:        plexus-velocity-1.1.7-build.xml
+#Source2:        plexus-velocity-1.1.7-project.xml
 Source3:        plexus-velocity-settings.xml
-Source4:        plexus-velocity-1.1.6-jpp-depmap.xml
+Source4:        plexus-velocity-1.1.7-jpp-depmap.xml
 
 
 %if ! %{gcj_support}
@@ -88,6 +88,7 @@ Requires:  plexus-utils
 Requires:  velocity
 Requires(post):    jpackage-utils >= 0:1.7.2
 Requires(postun):  jpackage-utils >= 0:1.7.2
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 The Plexus project seeks to create end-to-end developer tools for
@@ -110,7 +111,7 @@ for j in $(find . -name "*.jar"); do
         rm $j
 done
 cp %{SOURCE1} build.xml
-cp %{SOURCE2} project.xml
+#cp %{SOURCE2} project.xml
 cp %{SOURCE3} settings.xml
 
 %build
@@ -200,7 +201,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with_maven}
 %{_datadir}/maven2/poms/*
 %endif
-%{_mavendepmapfragdir}
+%config(noreplace) %{_mavendepmapfragdir}/*
 %if %{gcj_support}
 %dir %attr(-,root,root) %{_libdir}/gcj/%{name}
 %attr(-,root,root) %{_libdir}/gcj/%{name}/velocity-%{version}.jar.*
