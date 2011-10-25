@@ -1,4 +1,4 @@
-# Copyright (c) 2000-2007, JPackage Project
+# Copyright (c) 2000-2005, JPackage Project
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,40 +28,34 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define _with_gcj_support 1
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
-
 # If you don't want to build with maven, and use straight ant instead,
 # give rpmbuild option '--without maven'
-%define with_maven %{!?_without_maven:1}%{?_without_maven:0}
-%define without_maven %{?_without_maven:1}%{!?_without_maven:0}
+
+%define with_maven 1
+%define without_maven 0
 
 %define section     free
 %define parent plexus
 %define subname velocity
 
 Name:           plexus-velocity
-Version:        1.1.7
-Release:        %mkrel 1.0.1
-Epoch:          0
+Version:        1.1.8
+Release:        6
 Summary:        Plexus Velocity Component
-License:         Apache Software License
+License:        ASL 2.0
 Group:          Development/Java
 URL:            http://plexus.codehaus.org/
-# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.6/ && tar cvvzf plexus-velocity-1.1.6.tar.gz plexus-velocity-1.1.7/
-Source0:        plexus-velocity-%{version}.tar.gz
+# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.8/
+# tar czf plexus-velocity-1.1.8-src.tar.gz plexus-velocity-1.1.8/
+Source0:        plexus-velocity-%{version}-src.tar.gz
 Source1:        plexus-velocity-1.1.7-build.xml
-#Source2:        plexus-velocity-1.1.7-project.xml
-Source3:        plexus-velocity-settings.xml
-Source4:        plexus-velocity-1.1.7-jpp-depmap.xml
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%if ! %{gcj_support}
 BuildArch:      noarch
-%endif
-BuildRequires:  java-rpmbuild >= 0:1.7.2
+BuildRequires:  jpackage-utils >= 0:1.7.2
 BuildRequires:  ant >= 0:1.6
+BuildRequires:  java-devel >= 1.6.0
 %if %{with_maven}
 BuildRequires:  maven2 >= 2.0.4-10jpp
 BuildRequires:  maven2-plugin-compiler
@@ -69,19 +63,18 @@ BuildRequires:  maven2-plugin-install
 BuildRequires:  maven2-plugin-jar
 BuildRequires:  maven2-plugin-javadoc
 BuildRequires:  maven2-plugin-resources
-BuildRequires:  maven2-plugin-surefire
-BuildRequires:  maven2-plugin-release
+BuildRequires:  plexus-maven-plugin
+BuildRequires:  maven-surefire-maven-plugin
+BuildRequires:  maven-surefire-provider-junit
+BuildRequires:  maven-doxia-sitetools
 %endif
+BuildRequires:  ant-contrib
 BuildRequires:  ant-nodeps
 BuildRequires:  classworlds >= 0:1.1
 BuildRequires:  jakarta-commons-collections
-BuildRequires:  jakarta-commons-logging
 BuildRequires:  plexus-container-default
 BuildRequires:  plexus-utils
 BuildRequires:  velocity
-%if %{gcj_support}
-BuildRequires:          java-gcj-compat-devel
-%endif
 Requires:  classworlds >= 0:1.1
 Requires:  jakarta-commons-collections
 Requires:  plexus-container-default
@@ -89,7 +82,6 @@ Requires:  plexus-utils
 Requires:  velocity
 Requires(post):    jpackage-utils >= 0:1.7.2
 Requires(postun):  jpackage-utils >= 0:1.7.2
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 The Plexus project seeks to create end-to-end developer tools for
@@ -107,21 +99,13 @@ Group:          Development/Java
 Javadoc for %{name}.
 
 %prep
-%setup -q
+%setup -q -n plexus-velocity-%{version}
 for j in $(find . -name "*.jar"); do
-        rm $j
+        mv $j $j.no
 done
 cp %{SOURCE1} build.xml
-#cp %{SOURCE2} project.xml
-cp %{SOURCE3} settings.xml
 
 %build
-sed -i -e "s|<url>__JPP_URL_PLACEHOLDER__</url>|<url>file://`pwd`/.m2/repository</url>|g" settings.xml
-sed -i -e "s|<url>__JAVADIR_PLACEHOLDER__</url>|<url>file://`pwd`/external_repo</url>|g" settings.xml
-sed -i -e "s|<url>__MAVENREPO_DIR_PLACEHOLDER__</url>|<url>file://`pwd`/.m2/repository</url>|g" settings.xml
-sed -i -e "s|<url>__MAVENDIR_PLUGIN_PLACEHOLDER__</url>|<url>file:///usr/share/maven2/plugins</url>|g" settings.xml
-sed -i -e "s|<url>__ECLIPSEDIR_PLUGIN_PLACEHOLDER__</url>|<url>file:///usr/share/eclipse/plugins</url>|g" settings.xml
-
 export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
 mkdir -p $MAVEN_REPO_LOCAL
 
@@ -129,13 +113,12 @@ mkdir external_repo
 ln -s %{_javadir} external_repo/JPP
 
 %if %{with_maven}
+    # Use normal pom for now
+    rm -f release-pom.xml
     mvn-jpp \
         -e \
-        -s $(pwd)/settings.xml \
-        -Dmaven2.jpp.depmap.file=%{SOURCE4} \
         -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
         install javadoc:javadoc
-
 %else
 
 mkdir -p target/lib
@@ -147,7 +130,7 @@ plexus/container-default \
 plexus/utils \
 velocity \
 
-%{ant} jar javadoc
+ant jar javadoc
 
 %endif
 
@@ -158,11 +141,10 @@ rm -rf $RPM_BUILD_ROOT
 install -d -m 755 $RPM_BUILD_ROOT%{_javadir}/plexus
 install -pm 644 target/%{name}-%{version}.jar \
   $RPM_BUILD_ROOT%{_javadir}/plexus/velocity-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir}/plexus && for jar in *-%{version}*; \
-do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
 %add_to_maven_depmap org.codehaus.plexus %{name} %{version} JPP/%{parent} %{subname}
 
-(cd $RPM_BUILD_ROOT%{_javadir}/plexus && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+(cd $RPM_BUILD_ROOT%{_javadir}/plexus && for jar in *-%{version}*; \
+do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
 
 # poms
 %if %{with_maven}
@@ -176,38 +158,24 @@ install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 cp -pr target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
 ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
 
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-
 %post
 %update_maven_depmap
-%if %{gcj_support}
-%{update_gcjdb}
-%endif
 
 %postun
 %update_maven_depmap
-%if %{gcj_support}
-%{clean_gcjdb}
-%endif
 
 %files
 %defattr(-,root,root,-)
-%{_javadir}/*
+%{_javadir}/%{parent}
+%{_mavendepmapfragdir}
 %if %{with_maven}
-%{_datadir}/maven2/poms/*
-%endif
-%config(noreplace) %{_mavendepmapfragdir}/*
-%if %{gcj_support}
-%dir %attr(-,root,root) %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/velocity-%{version}.jar.*
+%{_datadir}/maven2
 %endif
 
 %files javadoc
 %defattr(-,root,root,-)
 %doc %{_javadocdir}/*
+
