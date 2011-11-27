@@ -40,7 +40,7 @@
 
 Name:           plexus-velocity
 Version:        1.1.8
-Release:        6
+Release:        8
 Summary:        Plexus Velocity Component
 License:        ASL 2.0
 Group:          Development/Java
