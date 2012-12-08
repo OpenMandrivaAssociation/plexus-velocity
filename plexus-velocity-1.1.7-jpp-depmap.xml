@@ -1,0 +1,27 @@
+<dependencies>
+  <dependency>
+    <maven>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-shared-components</artifactId>
+      <version>6</version>
+    </maven>
+    <jpp>
+      <groupId>JPP/maven-shared</groupId>
+      <artifactId>components-parent</artifactId>
+      <version>8</version>
+    </jpp>
+  </dependency>
+  <dependency>
+    <maven>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-archiver</artifactId>
+      <version>2.0.1</version>
+    </maven>
+    <jpp>
+      <groupId>JPP/maven2</groupId>
+      <artifactId>archiver</artifactId>
+      <version>2.0.4</version>
+    </jpp>
+  </dependency>
+
+</dependencies>
