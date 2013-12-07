@@ -43,7 +43,7 @@
 Summary:	Plexus Velocity Component
 Name:		plexus-velocity
 Version:	1.1.7
-Release:	1.0.4
+Release:	1.0.5
 License:	Apache Software License
 Group:		Development/Java
 Url:		http://plexus.codehaus.org/
