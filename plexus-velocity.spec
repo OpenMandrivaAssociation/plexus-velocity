@@ -42,7 +42,7 @@
 
 Name:           plexus-velocity
 Version:        1.1.7
-Release:        %mkrel 1.0.1
+Release:        1.0.2
 Epoch:          0
 Summary:        Plexus Velocity Component
 License:         Apache Software License
