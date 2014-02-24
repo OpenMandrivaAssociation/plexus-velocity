@@ -1,4 +1,5 @@
-# Copyright (c) 2000-2007, JPackage Project
+%{?_javapackages_macros:%_javapackages_macros}
+# Copyright (c) 2000-2005, JPackage Project
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,68 +29,46 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-%define _with_gcj_support 1
-%define gcj_support %{?_with_gcj_support:1}%{!?_with_gcj_support:%{?_without_gcj_support:0}%{!?_without_gcj_support:%{?_gcj_support:%{_gcj_support}}%{!?_gcj_support:0}}}
-
-# If you don't want to build with maven, and use straight ant instead,
-# give rpmbuild option '--without maven'
-%define with_maven 0
-%define without_maven 1
-
-%define section     free
 %define parent plexus
 %define subname velocity
 
 Name:           plexus-velocity
-Version:        1.1.7
-Release:        1.0.2
+Version:        1.1.8
+Release:        15.1%{?dist}
 Epoch:          0
 Summary:        Plexus Velocity Component
-License:         Apache Software License
-Group:          Development/Java
+License:        ASL 2.0
+
 URL:            http://plexus.codehaus.org/
-# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.6/ && tar cvvzf plexus-velocity-1.1.6.tar.gz plexus-velocity-1.1.7/
-Source0:        plexus-velocity-%{version}.tar.gz
-Source1:        plexus-velocity-1.1.7-build.xml
-#Source2:        plexus-velocity-1.1.7-project.xml
-Source3:        plexus-velocity-settings.xml
-Source4:        plexus-velocity-1.1.7-jpp-depmap.xml
+# svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.8/
+# tar czf plexus-velocity-1.1.8-src.tar.gz plexus-velocity-1.1.8/
+Source0:        plexus-velocity-%{version}-src.tar.gz
+Source1:        http://www.apache.org/licenses/LICENSE-2.0.txt
 
-BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
-
-%if ! %{gcj_support}
 BuildArch:      noarch
-%endif
-BuildRequires:  java-rpmbuild >= 0:1.7.2
+BuildRequires:  jpackage-utils >= 0:1.7.2
 BuildRequires:  ant >= 0:1.6
-%if %{with_maven}
-BuildRequires:  maven2 >= 2.0.4-10jpp
-BuildRequires:  maven2-plugin-compiler
-BuildRequires:  maven2-plugin-install
-BuildRequires:  maven2-plugin-jar
-BuildRequires:  maven2-plugin-javadoc
-BuildRequires:  maven2-plugin-resources
-BuildRequires:  maven2-plugin-surefire
-BuildRequires:  maven2-plugin-release
-%endif
-BuildRequires:  ant-nodeps
+BuildRequires:  java-devel >= 1:1.6.0
+BuildRequires:  maven-local
+BuildRequires:  maven-compiler-plugin
+BuildRequires:  maven-install-plugin
+BuildRequires:  maven-jar-plugin
+BuildRequires:  maven-javadoc-plugin
+BuildRequires:  maven-resources-plugin
+BuildRequires:  maven-surefire-plugin
+BuildRequires:  maven-surefire-provider-junit
+BuildRequires:  maven-doxia-sitetools
+BuildRequires:  ant-contrib
 BuildRequires:  classworlds >= 0:1.1
-BuildRequires:  jakarta-commons-collections
-BuildRequires:  jakarta-commons-logging
-BuildRequires:  plexus-container-default
+BuildRequires:  apache-commons-collections
+BuildRequires:  plexus-containers-container-default
 BuildRequires:  plexus-utils
 BuildRequires:  velocity
-%if %{gcj_support}
-BuildRequires:          java-gcj-compat-devel
-%endif
 Requires:  classworlds >= 0:1.1
-Requires:  jakarta-commons-collections
-Requires:  plexus-container-default
+Requires:  apache-commons-collections
+Requires:  plexus-containers-container-default
 Requires:  plexus-utils
 Requires:  velocity
-Requires(post):    jpackage-utils >= 0:1.7.2
-Requires(postun):  jpackage-utils >= 0:1.7.2
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 The Plexus project seeks to create end-to-end developer tools for
@@ -101,153 +80,124 @@ is like a J2EE application server, without all the baggage.
 
 %package javadoc
 Summary:        Javadoc for %{name}
-Group:          Development/Java
+
 
 %description javadoc
 Javadoc for %{name}.
 
 %prep
-%setup -q
+%setup -q -n plexus-velocity-%{version}
+cp -p %{SOURCE1} LICENSE
 for j in $(find . -name "*.jar"); do
-        rm $j
+        mv $j $j.no
 done
-cp %{SOURCE1} build.xml
-#cp %{SOURCE2} project.xml
-cp %{SOURCE3} settings.xml
 
 %build
-sed -i -e "s|<url>__JPP_URL_PLACEHOLDER__</url>|<url>file://`pwd`/.m2/repository</url>|g" settings.xml
-sed -i -e "s|<url>__JAVADIR_PLACEHOLDER__</url>|<url>file://`pwd`/external_repo</url>|g" settings.xml
-sed -i -e "s|<url>__MAVENREPO_DIR_PLACEHOLDER__</url>|<url>file://`pwd`/.m2/repository</url>|g" settings.xml
-sed -i -e "s|<url>__MAVENDIR_PLUGIN_PLACEHOLDER__</url>|<url>file:///usr/share/maven2/plugins</url>|g" settings.xml
-sed -i -e "s|<url>__ECLIPSEDIR_PLUGIN_PLACEHOLDER__</url>|<url>file:///usr/share/eclipse/plugins</url>|g" settings.xml
-
-export MAVEN_REPO_LOCAL=$(pwd)/.m2/repository
-mkdir -p $MAVEN_REPO_LOCAL
-
-mkdir external_repo
-ln -s %{_javadir} external_repo/JPP
-
-%if %{with_maven}
-    mvn-jpp \
+    # Use normal pom for now
+    rm -f release-pom.xml
+    mvn-rpmbuild \
         -e \
-        -s $(pwd)/settings.xml \
-        -Dmaven2.jpp.depmap.file=%{SOURCE4} \
-        -Dmaven.repo.local=$MAVEN_REPO_LOCAL \
-        install javadoc:javadoc
-
-%else
-
-mkdir -p target/lib
-build-jar-repository -s -p target/lib \
-classworlds \
-commons-collections \
-commons-logging-api \
-plexus/container-default \
-plexus/utils \
-velocity \
-
-%{ant} jar javadoc
-
-%endif
+        install javadoc:aggregate
 
 %install
-rm -rf $RPM_BUILD_ROOT
-
 # jars
-install -d -m 755 $RPM_BUILD_ROOT%{_javadir}/plexus
-install -pm 644 target/%{name}-%{version}.jar \
-  $RPM_BUILD_ROOT%{_javadir}/plexus/velocity-%{version}.jar
-(cd $RPM_BUILD_ROOT%{_javadir}/plexus && for jar in *-%{version}*; \
-do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
-%add_to_maven_depmap org.codehaus.plexus %{name} %{version} JPP/%{parent} %{subname}
-
-(cd $RPM_BUILD_ROOT%{_javadir}/plexus && for jar in *-%{version}*; do ln -sf ${jar} `echo $jar| sed  "s|-%{version}||g"`; done)
+install -Dpm 644 target/%{name}-%{version}.jar \
+   %{buildroot}/%{_javadir}/%{parent}/%{subname}.jar
 
 # poms
-%if %{with_maven}
-install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/maven2/poms
-install -pm 644 pom.xml \
-    $RPM_BUILD_ROOT%{_datadir}/maven2/poms/JPP.%{parent}-%{subname}.pom
-%endif
+install -Dpm 644 pom.xml %{buildroot}/%{_mavenpomdir}/JPP.%{name}.pom
+%add_maven_depmap JPP.%{name}.pom %{parent}/%{subname}.jar
 
 # javadoc
-install -d -m 755 $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-cp -pr target/site/apidocs/* $RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
-ln -s %{name}-%{version} $RPM_BUILD_ROOT%{_javadocdir}/%{name} # ghost symlink
-
-%if %{gcj_support}
-%{_bindir}/aot-compile-rpm
-%endif
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-
-%post
-%update_maven_depmap
-%if %{gcj_support}
-%{update_gcjdb}
-%endif
-
-%postun
-%update_maven_depmap
-%if %{gcj_support}
-%{clean_gcjdb}
-%endif
+install -d -m 755 %{buildroot}/%{_javadocdir}/%{name}
+cp -pr target/site/apidocs/* %{buildroot}/%{_javadocdir}/%{name}
 
 %files
-%defattr(-,root,root,-)
-%{_javadir}/*
-%if %{with_maven}
-%{_datadir}/maven2/poms/*
-%endif
-%config(noreplace) %{_mavendepmapfragdir}/*
-%if %{gcj_support}
-%dir %attr(-,root,root) %{_libdir}/gcj/%{name}
-%attr(-,root,root) %{_libdir}/gcj/%{name}/velocity-%{version}.jar.*
-%endif
+%doc LICENSE
+%{_javadir}/%{parent}/*
+%{_mavendepmapfragdir}/*
+%{_mavenpomdir}/*
 
 %files javadoc
-%defattr(-,root,root,-)
+%doc LICENSE
 %doc %{_javadocdir}/*
 
-
 %changelog
-* Wed Jan 02 2008 Olivier Blin <oblin@mandriva.com> 0:1.1.7-1.0.1mdv2009.0
-+ Revision: 140733
-- restore BuildRoot
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.8-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 
-* Wed Jan 02 2008 David Walluck <walluck@mandriva.org> 0:1.1.7-1.0.1mdv2008.1
-+ Revision: 140672
-- 1.1.7-1jpp (JPP 5.0)
+* Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.8-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
-  + Thierry Vignaud <tvignaud@mandriva.com>
-    - kill re-definition of %%buildroot on Pixel's request
+* Wed Feb 06 2013 Java SIG <java-devel@lists.fedoraproject.org> - 0:1.1.8-13
+- Update for https://fedoraproject.org/wiki/Fedora_19_Maven_Rebuild
+- Replace maven BuildRequires with maven-local
 
-  + Anssi Hannula <anssi@mandriva.org>
-    - buildrequire java-rpmbuild, i.e. build with icedtea on x86(_64)
+* Thu Nov 22 2012 Jaromir Capik <jcapik@redhat.com> - 0:1.1.8-12
+- Migration to plexus-containers-container-default
 
-* Sat Dec 15 2007 Alexander Kurtakov <akurtakov@mandriva.org> 0:1.1.6-0.0.3mdv2008.1
-+ Revision: 120384
-- add maven2-plugin-release BR
-- install maven poms (build with maven)
+* Wed Nov 21 2012 Mikolaj Izdebski <mizdebsk@redhat.com> - 0:1.1.8-11
+- Install LICENSE file
+- Resolves: rhbz#878833
 
-* Sat Sep 15 2007 Anssi Hannula <anssi@mandriva.org> 0:1.1.6-0.0.2mdv2008.0
-+ Revision: 87331
-- rebuild to filter out autorequires of GCJ AOT objects
-- remove unnecessary Requires(post) on java-gcj-compat
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.8-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
-* Sun Aug 05 2007 David Walluck <walluck@mandriva.org> 0:1.1.6-0.0.1mdv2008.0
-+ Revision: 59154
-- 1.1.6
+* Sat Jan 14 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.8-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
 
-* Wed Jul 04 2007 David Walluck <walluck@mandriva.org> 0:1.1.2-2.1.1mdv2008.0
-+ Revision: 47876
-- fix BuildRoot
-- Import plexus-velocity
+* Wed Sep 7 2011 Alexander Kurtakov <akurtako@redhat.com> 0:1.1.8-8
+- Drop ant build.
+- Further cleanups.
 
+* Thu Jul 28 2011 Jaromir Capik <jcapik@redhat.com> - 0:1.1.8-7
+- Migration to maven3
+- Removal of plexus-maven-plugin (not needed)
+- Minor spec file changes according to the latest guidelines
 
+* Wed Feb 09 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.8-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
+* Tue Dec 22 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.1.8-5
+- BR java-devel 1.6.
+
+* Tue Dec 22 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.1.8-4
+- BR maven-surefire-provider-junit.
+
+* Tue Dec 22 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.1.8-3
+- BR maven-doxia-sitetools.
+
+* Tue Dec 22 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.1.8-2
+- BR plexus-maven-plugin.
+
+* Tue Dec 22 2009 Alexander Kurtakov <akurtako@redhat.com> 0:1.1.8-1
+- Update to upstream 1.1.8.
+
+* Fri Aug 21 2009 Andrew Overholt <overholt@redhat.com> 1.1.7-3.3
+- Add ant-nodeps BR
+
+* Fri Aug 21 2009 Andrew Overholt <overholt@redhat.com> 1.1.7-3.2
+- Add ant-contrib BR
+
+* Fri Aug 21 2009 Andrew Overholt <overholt@redhat.com> 0:1.1.7-3.1
+- Import from Deepak Bhole's work (import from JPackage, update to 1.1.7)
+- Remove gcj support
+
+* Sun Jul 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.2-5.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
+* Thu Feb 26 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 0:1.1.2-4.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_11_Mass_Rebuild
+
+* Wed Jul  9 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 0:1.1.2-3.2
+- drop repotag
+
+* Tue Feb 19 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 0:1.1.2-3jpp.1
+- Autorebuild for GCC 4.3
+
+* Sat Mar 24 2007 Ralph Apel <r.apel at r-apel.de> - 0:1.1.2-3jpp
+- Build with maven2 by default
+- Add gcj_support options
 
 * Fri Feb 16 2007 Tania Bento <tbento@redhat.com> - 0:1.1.2-2jpp.1
 - Fixed %%License.
