@@ -4,8 +4,9 @@
 
 Name:           plexus-velocity
 Version:        1.1.8
-Release:        17%{?dist}
+Release:        17.2
 Summary:        Plexus Velocity Component
+Group:		Development/Java
 License:        ASL 2.0
 URL:            http://plexus.codehaus.org/
 BuildArch:      noarch
@@ -15,6 +16,7 @@ BuildArch:      noarch
 Source0:        plexus-velocity-%{version}-src.tar.gz
 Source1:        http://www.apache.org/licenses/LICENSE-2.0.txt
 
+BuildRequires:	junit
 BuildRequires:  maven-local
 BuildRequires:  mvn(commons-collections:commons-collections)
 BuildRequires:  mvn(org.codehaus.plexus:plexus-components:pom:)
@@ -41,6 +43,8 @@ cp -p %{SOURCE1} LICENSE
 for j in $(find . -name "*.jar"); do
         mv $j $j.no
 done
+
+%pom_add_dep junit:junit::test
 
 %build
 %mvn_build
