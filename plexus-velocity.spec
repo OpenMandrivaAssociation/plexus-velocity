@@ -8,7 +8,7 @@ Release:        17.3
 Summary:        Plexus Velocity Component
 Group:		Development/Java
 License:        ASL 2.0
-URL:            http://plexus.codehaus.org/
+URL:            https://plexus.codehaus.org/
 BuildArch:      noarch
 
 # svn export http://svn.codehaus.org/plexus/plexus-components/tags/plexus-velocity-1.1.8/
