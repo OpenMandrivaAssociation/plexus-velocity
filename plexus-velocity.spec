@@ -13,6 +13,9 @@ BuildRequires:	mvn(org.apache.velocity:velocity-engine-core)
 BuildRequires:	mvn(org.slf4j:slf4j-api)
 BuildRequires:	mvn(javax.inject:javax.inject)
 BuildRequires:	mvn(org.eclipse.sisu:org.eclipse.sisu.inject)
+BuildRequires:	mvn(com.google.inject:guice-parent:pom::)
+BuildRequires:	mvn(org.slf4j:slf4j-parent:pom::)
+BuildRequires:	mvn(org.codehaus.plexus:plexus-containers:pom::)
 # Literal, so the first rpmbuild -bs records them before sysjar is installed.
 BuildRequires:	maven
 BuildRequires:	java-current-devel
