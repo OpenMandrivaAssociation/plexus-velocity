@@ -1,2 +1,4 @@
 sources:
+  plexus-velocity-2.4.0.tar.gz: a0be12f9c98c53bc42d498a8490ed5b6c66997a8
+removed_sources:
   plexus-velocity-2.2.0.tar.gz: e4cfb1d5ce198f09e03cdc4281901212c4557135
